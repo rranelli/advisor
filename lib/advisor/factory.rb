@@ -6,9 +6,12 @@ module Advisor
     end
 
     def build
+      name = applier_name
+      advice_applier = method(:advisor_module)
+
       Module.new do
-        define_method(applier_name) do |*methods, **args|
-          prepend advisor_module(methods, args)
+        define_method(name) do |*methods, **args|
+          prepend advice_applier.call(methods, args)
         end
       end
     end
@@ -20,10 +23,12 @@ module Advisor
     private
 
     def advisor_module(methods, args)
+      advice_klasss = advice_klass
+
       Module.new do
         methods.each do |method_name|
           define_method(method_name) do |*call_args, &blk|
-            advice = advice_klass.new(self, method_name, call_args, **args)
+            advice = advice_klasss.new(self, method_name, call_args, **args)
             advice.apply { super(*call_args, &blk) }
           end
         end

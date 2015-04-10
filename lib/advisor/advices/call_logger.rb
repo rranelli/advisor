@@ -3,11 +3,15 @@ require 'logger'
 module Advisor
   module Advices
     class CallLogger
+      class << self
+        attr_accessor :default_logger
+      end
+
       def initialize(object, method, call_args, **opts)
         @object = object
         @method = method
         @call_args = call_args
-        @logger = opts[:logger] || Logger.new(STDOUT)
+        @logger = opts[:logger] || CallLogger.default_logger
       end
 
       attr_reader :object, :method, :call_args, :logger

@@ -23,13 +23,13 @@ module Advisor
     private
 
     def advisor_module(methods, args)
-      advice_klasss = advice_klass
+      advice_klazz = advice_klass
 
       Module.new do
         methods.each do |method_name|
           define_method(method_name) do |*call_args, &blk|
-            advice = advice_klasss.new(self, method_name, call_args, **args)
-            advice.apply { super(*call_args, &blk) }
+            advice = advice_klazz.new(self, method_name, call_args, **args)
+            advice.call { super(*call_args, &blk) }
           end
         end
       end

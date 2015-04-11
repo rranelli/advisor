@@ -14,8 +14,8 @@ module Advisor
 
       let(:block) { -> () { :bla } }
 
-      describe '#apply' do
-        subject(:apply) { advice.apply(&block) }
+      describe '#call' do
+        subject(:call) { advice.call(&block) }
 
         let(:log_message) do
           "[Time=#{Time.now}][Thread=#{Thread.current.object_id}][id=42]\
@@ -32,7 +32,7 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
         it do
           expect(logger).to receive(:info).with(log_message)
 
-          apply
+          call
         end
 
         context 'when yielding the block raises an exception' do
@@ -46,12 +46,12 @@ deu ruim!"
 
           before { allow(logger).to receive(:error) }
 
-          it { expect { apply }.to raise_error(StandardError, 'deu ruim!') }
+          it { expect { call }.to raise_error(StandardError, 'deu ruim!') }
 
           it do
             expect(logger).to receive(:error).with(log_message)
 
-            expect { apply }.to raise_error
+            expect { call }.to raise_error
           end
         end
       end

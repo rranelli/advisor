@@ -16,7 +16,7 @@ module Advisor
 
       attr_reader :object, :method, :call_args, :logger
 
-      def apply
+      def call
         logger.info(success_message)
         yield
       rescue => e

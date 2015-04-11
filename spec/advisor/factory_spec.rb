@@ -42,7 +42,7 @@ module Advisor
 
     it 'uses the call_logger to log the method call' do
       expect(call_logger)
-        .to receive(:apply)
+        .to receive(:call)
         .and_call_original
 
       loggable_instance.inc(1)

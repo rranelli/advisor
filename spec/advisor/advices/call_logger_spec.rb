@@ -44,12 +44,12 @@ Failed: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")
 deu ruim!"
           end
 
-          before { allow(logger).to receive(:error) }
+          before { allow(logger).to receive(:warn) }
 
           it { expect { call }.to raise_error(StandardError, 'deu ruim!') }
 
           it do
-            expect(logger).to receive(:error).with(log_message)
+            expect(logger).to receive(:warn).with(log_message)
 
             expect { call }.to raise_error
           end

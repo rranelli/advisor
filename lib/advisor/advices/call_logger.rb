@@ -20,7 +20,7 @@ module Advisor
         logger.info(success_message)
         yield
       rescue => e
-        logger.error(failure_message(e))
+        logger.warn(failure_message(e))
         raise
       end
 

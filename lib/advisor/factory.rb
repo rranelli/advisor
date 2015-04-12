@@ -1,17 +1,15 @@
 module Advisor
   class Factory
-    def initialize(advice_klass, applier_name)
+    def initialize(advice_klass)
       @advice_klass = advice_klass
-      @applier_name = applier_name
     end
 
     def build
-      name = applier_name
       advice_klazz = advice_klass
       advisor_module = method(:advisor_module)
 
       Module.new do
-        define_method(name) do |*methods, **args|
+        define_method(advice_klazz.applier_method) do |*methods, **args|
           methods_str = methods.map(&:to_s).join(', ')
 
           mod = advisor_module.call(methods, args)
@@ -27,7 +25,7 @@ module Advisor
 
     protected
 
-    attr_reader :advice_klass, :applier_name
+    attr_reader :advice_klass
 
     private
 

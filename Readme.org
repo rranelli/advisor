@@ -1,0 +1,125 @@
+* Advisor: Solve your cross-cutting concerns without mumbo-jumbo.
+
+  =Advisor= is Ruby gem that enables you to solve cross-cutting concerns without
+  the usual =method-renaming= present in most alternatives.
+
+  =Advisor= intercepts method calls and allows you to mix cross cutting concerns
+  and tedious book-keeping tasks. Logging, metric reporting, auditing, timing,
+  timeouting can be handled beautifully.
+
+  =Advisor= works with plain Ruby modules and do not mess your stack trace.
+
+  Also, the amount of /intrusion/ required to set up is kept to a minimum while
+  still keeping it /discoverable/. Every affected class must explicitly extend a
+  given module and every affected method call must also be declared.
+
+*** Usage
+
+    =Advisor= is organized between two main concepts only: =Advisor modules= and
+    =Advice modules=. =Advisor modules= are extensions applied to your classes
+    and =Advice modules= define the actual behavior of the intercepted method
+    calls.
+
+    In order to understand better how =Advisor= works, we are going to use an
+    example:
+
+***** Example
+
+      Suppose you want to log calls to some methods but don't want to keep
+      repeating the message formatting or messing with the method body.
+      =Advisor= provides a simple built-in module called =Advisor::Loggable=
+      that solves this issue.
+
+      #+begin_src ruby
+      class Account
+        extend Advisor::Loggable
+
+        log_calls_to :deposit
+
+        def deposit(_amount, _origin)
+          #...
+          :done
+        end
+      end
+      #+end_src
+
+      In an interactive console:
+
+      #+begin_src ruby
+      $ Account.new.deposit(300, 'Jane Doe')
+      # => I, [2015-04-11T21:26:42.405180 #13840]  INFO -- : [Time=2015-04-11 21:26:42 -0300][Thread=70183196300040]Called: Account#deposit(300, "Jane Doe")
+      # => :done
+      #+end_src
+
+      As you can see, the method call is intercepted and a message is printed to
+      =stdout=.
+
+      =Advisor= achieves this by using Ruby 2.0's =Module#prepend=. If you were
+      to check =Account='s ancestors you would get:
+
+      #+begin_src ruby
+      $ Account.ancestors
+      # => [Advisor::Advices::CallLogger(deposit), Account, Object, Kernel, BasicObject]
+      #+end_src
+
+      As you can see, the =Advisor::Advices::CallLogger(deposit)= module is
+      listed *before* Account itself in the ancestor chain.
+
+      In the next session we are going to explain how to write your own custom
+      advice.
+
+***** Writing an =Advice=
+
+      An =Advice= defines what to do with the advised method call.
+
+      The required interface for an advice must be like the example bellow:
+
+      #+begin_src ruby
+      class Advice
+        def initialize(receiver, advised_method, call_args, **options)
+          # The constructor of an advice must receive 3 arguments and extra options.
+          # Those extra options are defined when applying the extension to the advised
+          # class.
+        end
+
+        def self.applier_method
+          # Must return the name of the method which must be called in the class body
+          # to define which methods will be intercepted with the advice.
+
+          # In the case of `Advisor::Loggable`, this method returns `:log_calls_to`
+        end
+
+        def call
+          # This is the body of the advice.
+          #
+          # This method will always be called with the block `{ super(*call_args,
+          # &blk) }` That means the method implementation can decide when to run the
+          # advised method call. Check `Advisor::Advices::CallLogger` for an example.
+        end
+      end
+      #+end_src
+
+***** Creating an =Advisor= module
+
+      Every =Advisor= module must be built from the corresponding =Advice= by
+      using the =Advisor::Factory#build= method.
+
+      =Advisor::Loggable= is built from the =Advisor::Advices::CallLogger=
+      module.
+
+      =Advisor::Loggable= itself is built like this:
+
+      #+begin_src ruby
+      module Advisor
+        Loggable = Factory.new(Advices::CallLogger).build
+      end
+      #+end_src
+
+      Hence, if your custom =Advice= complies to the required interface,
+      =Advisor::Factory= will be able to convert it to an extension module with
+      no problems.
+
+*** Disclaimer
+
+    This version of the library is still experimental and probably not
+    production ready. Use at your own risk.

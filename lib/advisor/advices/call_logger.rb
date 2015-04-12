@@ -6,6 +6,7 @@ module Advisor
       class << self
         attr_accessor :default_logger
       end
+      self.default_logger = Logger.new(STDOUT)
 
       def initialize(object, method, call_args, **opts)
         @object = object
@@ -15,6 +16,10 @@ module Advisor
       end
 
       attr_reader :object, :method, :call_args, :logger
+
+      def self.applier_method
+        :log_calls_to
+      end
 
       def call
         logger.info(success_message)

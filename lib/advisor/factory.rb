@@ -4,6 +4,10 @@ module Advisor
       @advice_klass = advice_klass
     end
 
+    def self.build(advice_klass)
+      new(advice_klass).build
+    end
+
     def build
       advice_klazz = advice_klass
       advisor_module = method(:advisor_module)

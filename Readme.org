@@ -1,5 +1,7 @@
 * Advisor: Solve your cross-cutting concerns without mumbo-jumbo.
 
+  [[https://travis-ci.org/rranelli/advisor.svg?branch=master][https://travis-ci.org/rranelli/advisor.svg]]
+
   =Advisor= is Ruby gem that enables you to solve cross-cutting concerns without
   the usual =method-renaming= present in most alternatives.
 

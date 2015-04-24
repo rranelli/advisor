@@ -12,7 +12,7 @@ module Advisor
       let(:args) { ['the universe', 'and everything'] }
       let(:logger) { instance_double(Logger) }
 
-      let(:block) { -> () { :bla } }
+      let(:block) { -> { :bla } }
 
       describe '#call' do
         subject(:call) { advice.call(&block) }

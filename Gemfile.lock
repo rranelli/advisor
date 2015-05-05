@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    advisor (0.2.0)
+    advisor (0.2.1)
       metriks
 
 GEM

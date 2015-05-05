@@ -31,21 +31,14 @@ module Advisor
       end
 
       def call
-        (timed? ? timed_call { yield } : yield)
-          .tap { |result| instruments.each(&measure(result)) }
+        result = timed? ? timer.time { yield } : yield
+        result.tap { instruments.each(&measure(result)) }
       rescue => e
         logger.warn(e)
         raise
       end
 
       private
-
-      def timed_call
-        timer.time
-        yield.tap do
-          timer.stop
-        end
-      end
 
       def measure(result)
         # How I wish I had currying...

@@ -138,14 +138,11 @@ module Advisor
         context 'when using a timer' do
           let(:instruments) { %i(counter result_meter call_meter gauge timer) }
 
-          let(:timer) { instance_double(::Metriks::Timer) }
+          let(:timer) { ::Metriks.timer('a-timer') }
 
           before do
             allow(::Metriks).to receive(:timer)
               .and_return(timer)
-
-            allow(timer).to receive(:time)
-            allow(timer).to receive(:stop)
           end
 
           it_behaves_like 'instruments && measuring'
@@ -153,13 +150,14 @@ module Advisor
           it 'finds the right timer metric' do
             expect(::Metriks).to receive(:timer)
               .with('OpenStruct#the_force_awakens_timer')
+              .and_call_original
 
             call
           end
 
           it 'times the method call' do
             expect(timer).to receive(:time)
-            expect(timer).to receive(:stop)
+              .and_call_original
 
             call
           end

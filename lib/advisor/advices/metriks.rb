@@ -4,23 +4,17 @@ require 'metriks'
 module Advisor
   module Advices
     class Metriks
-      class << self
-        attr_accessor :default_logger
-      end
-      self.default_logger = Logger.new(STDOUT)
-
       def initialize(object, method, _call_args, **opts)
         @object = object
         @method = method
 
         @instruments = Array(opts.fetch(:with)).uniq
-        @logger = opts[:logger] || Metriks.default_logger
 
         fail 'No instruments defined' if instruments.empty?
         fail 'Unknown Instrument' unless instruments.all?(&known_instrument?)
       end
 
-      attr_reader :object, :method, :logger, :instruments
+      attr_reader :object, :method, :instruments
 
       INSTRUMENTS = [
         :counter, :timer, :gauge, :call_meter, :result_meter

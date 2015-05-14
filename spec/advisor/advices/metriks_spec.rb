@@ -170,6 +170,46 @@ module Advisor
 
           it_behaves_like 'instruments && measuring'
         end
+
+        context 'when the block throws an exception' do
+          let(:block) { -> { fail 'i be error' } }
+
+          let(:instruments) { %i(gauge timer counter) }
+
+          it 'raises the error raised when yielding the block' do
+            expect { call }.to raise_error(RuntimeError, 'i be error')
+          end
+
+          it 'times the method call' do
+            expect(::Metriks).to receive(:timer)
+              .with('OpenStruct#the_force_awakens_timer')
+              .and_call_original
+
+            expect { call }.to raise_error
+          end
+
+          it 'does measure the execution with a nil result' do
+            expect(advice).to receive(:measure)
+              .with(nil)
+              .once
+
+            expect { call }.to raise_error
+          end
+
+          it 'does not measure with a gauge' do
+            expect(::Metriks).not_to receive(:gauge)
+
+            expect { call }.to raise_error
+          end
+
+          it 'does increment the counter' do
+            expect(::Metriks).to receive(:counter)
+              .with('OpenStruct#the_force_awakens_counter')
+              .and_call_original
+
+            expect { call }.to raise_error
+          end
+        end
       end
     end
   end

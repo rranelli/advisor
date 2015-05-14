@@ -32,10 +32,8 @@ module Advisor
 
       def call
         result = timed? ? timer.time { yield } : yield
-        result.tap { instruments.each(&measure(result)) }
-      rescue => e
-        logger.warn(e)
-        raise
+      ensure
+        instruments.each(&measure(result))
       end
 
       private

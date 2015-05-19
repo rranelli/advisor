@@ -39,10 +39,12 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
           let(:block) { -> () { fail 'deu ruim!' } }
 
           let(:log_message) do
-            "[Time=#{Time.now}][Thread=#{Thread.current.object_id}][id=42]\
-Failed: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")
-deu ruim!"
+            /\[Time=#{Time.now}\]\[Thread=#{Thread.current.object_id}\]\
+\[id=42\]Failed: OpenStruct#the_meaning_of_life\(\"the universe\", \"and\
+ everything\"\).*/
           end
+
+          let(:error_message) { /^deu ruim!/ }
 
           before { allow(logger).to receive(:warn) }
 
@@ -50,7 +52,11 @@ deu ruim!"
 
           it do
             expect(logger).to receive(:warn).with(log_message)
+            expect { call }.to raise_error
+          end
 
+          it do
+            expect(logger).to receive(:warn).with(error_message)
             expect { call }.to raise_error
           end
         end

@@ -36,7 +36,8 @@ module Advisor
       end
 
       def failure_message(ex)
-        call_message('Failed: ', "\n#{ex}")
+        backtrace = ["\n", ex.to_s] + ex.backtrace
+        call_message('Failed: ', backtrace.join("\n"))
       end
 
       def call_message(prefix, suffix = '')

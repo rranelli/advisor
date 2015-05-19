@@ -35,7 +35,7 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
           call
         end
 
-        context 'when yielding the block raises an exception' do
+        context 'when yielding the block raises an error' do
           let(:block) { -> () { fail 'deu ruim!' } }
 
           let(:log_message) do
@@ -44,9 +44,15 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
  everything\"\).*/
           end
 
-          let(:error_message) { /^deu ruim!/ }
+          let(:error_message) { /deu ruim!/ }
 
-          before { allow(logger).to receive(:warn) }
+          let(:catch_exception) { false }
+
+          before do
+            allow(logger).to receive(:warn)
+            allow(CallLogger).to receive(:catch_exception)
+              .and_return(catch_exception)
+          end
 
           it { expect { call }.to raise_error(StandardError, 'deu ruim!') }
 
@@ -58,6 +64,31 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
           it do
             expect(logger).to receive(:warn).with(error_message)
             expect { call }.to raise_error
+          end
+
+          context 'when the error is not a StandardError' do
+            let(:block) { -> { fail Exception, 'deu muito ruim!' } }
+
+            let(:error_message) { /deu muito ruim!/ }
+
+            it do
+              expect(logger).not_to receive(:warn).with(log_message)
+              expect { call }.to raise_error(Exception, 'deu muito ruim!')
+            end
+
+            context 'when catching exceptions' do
+              let(:catch_exception) { true }
+
+              it do
+                expect(logger).to receive(:warn).with(log_message)
+                expect { call }.to raise_error(Exception, 'deu muito ruim!')
+              end
+
+              it do
+                expect(logger).to receive(:warn).with(error_message)
+                expect { call }.to raise_error(Exception, 'deu muito ruim!')
+              end
+            end
           end
         end
       end

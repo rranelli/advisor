@@ -5,8 +5,10 @@ module Advisor
     class CallLogger
       class << self
         attr_accessor :default_logger
+        attr_accessor :catch_exception
       end
       self.default_logger = Logger.new(STDOUT)
+      self.catch_exception = false
 
       def initialize(object, method, call_args, **opts)
         @object = object
@@ -24,7 +26,7 @@ module Advisor
       def call
         logger.info(success_message)
         yield
-      rescue => e
+      rescue exception_class => e
         logger.warn(failure_message(e))
         raise
       end
@@ -64,6 +66,10 @@ module Advisor
 
       def id
         "[id=#{object.id}]" if object.respond_to?(:id)
+      end
+
+      def exception_class
+        CallLogger.catch_exception ? Exception : StandardError
       end
     end
   end

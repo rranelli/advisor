@@ -4,13 +4,14 @@ module Advisor
   module Advices
     describe CallLogger do
       subject(:advice) do
-        described_class.new(object, method, args, logger: logger)
+        described_class.new(object, method, args, logger: logger, with: tag)
       end
 
-      let(:object) { OpenStruct.new(id: 42) }
+      let(:object) { OpenStruct.new(id: 42, x: 'y') }
       let(:method) { 'the_meaning_of_life' }
       let(:args) { ['the universe', 'and everything'] }
       let(:logger) { instance_double(Logger) }
+      let(:tag) { -> { "[x=#{x}]" } }
 
       let(:block) { -> { :bla } }
 
@@ -18,7 +19,7 @@ module Advisor
         subject(:call) { advice.call(&block) }
 
         let(:log_message) do
-          "[Time=#{Time.now}][Thread=#{Thread.current.object_id}][id=42]\
+          "[Time=#{Time.now}][Thread=#{Thread.current.object_id}][id=42][x=y]\
 Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
         end
 
@@ -39,8 +40,9 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
           let(:block) { -> () { fail 'deu ruim!' } }
 
           let(:log_message) do
-            /\[Time=#{Time.now}\]\[Thread=#{Thread.current.object_id}\]\
-\[id=42\]Failed: OpenStruct#the_meaning_of_life\(\"the universe\", \"and\
+            /\[Time=#{Regexp.quote(Time.now.to_s)}\]\
+\[Thread=#{Thread.current.object_id}\]\
+\[id=42\]\[x=y\]Failed: OpenStruct#the_meaning_of_life\(\"the universe\", \"and\
  everything\"\).*/
           end
 
@@ -89,6 +91,17 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
                 expect { call }.to raise_error(Exception, 'deu muito ruim!')
               end
             end
+          end
+        end
+
+        context 'when no custom tag is provided' do
+          let(:tag) {}
+          let(:log_without_custom_tag) { log_message.gsub("[x=y]", "") }
+
+          it do
+            expect(logger).to receive(:info).with(log_without_custom_tag)
+
+            call
           end
         end
       end

@@ -15,9 +15,10 @@ module Advisor
         @method = method
         @call_args = call_args
         @logger = opts[:logger] || CallLogger.default_logger
+        @tag_proc = opts[:with] || ->{}
       end
 
-      attr_reader :object, :method, :call_args, :logger
+      attr_reader :object, :method, :call_args, :logger, :tag_proc
 
       def self.applier_method
         :log_calls_to
@@ -43,7 +44,7 @@ module Advisor
       end
 
       def call_message(prefix, suffix = '')
-        "#{time}#{thread}#{id}#{prefix}\
+        "#{time}#{thread}#{id}#{custom_tag}#{prefix}\
 #{klass}##{method}(#{arguments})\
 #{suffix}"
       end
@@ -54,6 +55,10 @@ module Advisor
 
       def time
         "[Time=#{Time.now}]"
+      end
+
+      def custom_tag
+        object.instance_exec(&tag_proc)
       end
 
       def klass

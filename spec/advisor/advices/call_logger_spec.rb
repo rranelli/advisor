@@ -40,7 +40,8 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
           let(:block) { -> () { fail 'deu ruim!' } }
 
           let(:log_message) do
-            /\[Time=#{Time.now}\]\[Thread=#{Thread.current.object_id}\]\
+            /\[Time=#{Regexp.quote(Time.now.to_s)}\]\
+\[Thread=#{Thread.current.object_id}\]\
 \[id=42\]\[x=y\]Failed: OpenStruct#the_meaning_of_life\(\"the universe\", \"and\
  everything\"\).*/
           end

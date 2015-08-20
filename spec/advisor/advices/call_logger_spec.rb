@@ -46,12 +46,10 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
  everything\"\).*/
           end
 
-          let(:error_message) { /deu ruim!/ }
-
           let(:catch_exception) { false }
 
           before do
-            allow(logger).to receive(:warn)
+            allow(logger).to receive(:error)
             allow(CallLogger).to receive(:catch_exception)
               .and_return(catch_exception)
           end
@@ -59,22 +57,20 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
           it { expect { call }.to raise_error(StandardError, 'deu ruim!') }
 
           it do
-            expect(logger).to receive(:warn).with(log_message)
+            expect(logger).to receive(:error).with(log_message)
             expect { call }.to raise_error
           end
 
           it do
-            expect(logger).to receive(:warn).with(error_message)
+            expect(logger).to receive(:error).with(log_message)
             expect { call }.to raise_error
           end
 
           context 'when the error is not a StandardError' do
             let(:block) { -> { fail Exception, 'deu muito ruim!' } }
 
-            let(:error_message) { /deu muito ruim!/ }
-
             it do
-              expect(logger).not_to receive(:warn).with(log_message)
+              expect(logger).not_to receive(:error).with(log_message)
               expect { call }.to raise_error(Exception, 'deu muito ruim!')
             end
 
@@ -82,12 +78,12 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
               let(:catch_exception) { true }
 
               it do
-                expect(logger).to receive(:warn).with(log_message)
+                expect(logger).to receive(:error).with(log_message)
                 expect { call }.to raise_error(Exception, 'deu muito ruim!')
               end
 
               it do
-                expect(logger).to receive(:warn).with(error_message)
+                expect(logger).to receive(:error).with(log_message)
                 expect { call }.to raise_error(Exception, 'deu muito ruim!')
               end
             end
@@ -96,7 +92,7 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
 
         context 'when no custom tag is provided' do
           let(:tag) {}
-          let(:log_without_custom_tag) { log_message.gsub("[x=y]", "") }
+          let(:log_without_custom_tag) { log_message.gsub('[x=y]', '') }
 
           it do
             expect(logger).to receive(:info).with(log_without_custom_tag)

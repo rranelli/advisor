@@ -15,7 +15,7 @@ module Advisor
         @method = method
         @call_args = call_args
         @logger = opts[:logger] || CallLogger.default_logger
-        @tag_proc = opts[:with] || ->{}
+        @tag_proc = opts[:with] || -> {}
       end
 
       attr_reader :object, :method, :call_args, :logger, :tag_proc
@@ -28,7 +28,7 @@ module Advisor
         logger.info(success_message)
         yield
       rescue exception_class => e
-        logger.warn(failure_message(e))
+        logger.error(failure_message(e))
         raise
       end
 

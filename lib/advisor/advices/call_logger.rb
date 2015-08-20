@@ -4,21 +4,23 @@ module Advisor
   module Advices
     class CallLogger
       class << self
+        attr_accessor :backtrace_cleaner
         attr_accessor :default_logger
         attr_accessor :catch_exception
       end
       self.default_logger = Logger.new(STDOUT)
-      self.catch_exception = false
 
       def initialize(object, method, call_args, **opts)
         @object = object
         @method = method
         @call_args = call_args
+
+        @cleaner = opts[:backtrace_cleaner] || CallLogger.backtrace_cleaner
         @logger = opts[:logger] || CallLogger.default_logger
         @tag_proc = opts[:with] || -> {}
       end
 
-      attr_reader :object, :method, :call_args, :logger, :tag_proc
+      attr_reader :object, :method, :call_args, :logger, :tag_proc, :cleaner
 
       def self.applier_method
         :log_calls_to
@@ -40,6 +42,7 @@ module Advisor
 
       def failure_message(ex)
         backtrace = ["\n", ex.to_s] + ex.backtrace
+        backtrace = cleaner.clean(backtrace) if cleaner
         call_message('Failed: ', backtrace.join("\n"))
       end
 

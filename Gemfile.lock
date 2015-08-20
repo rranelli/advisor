@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    advisor (0.5.0)
+    advisor (0.5.1)
       metriks
 
 GEM
@@ -74,4 +74,4 @@ DEPENDENCIES
   rubocop
 
 BUNDLED WITH
-   1.10.5
+   1.10.6

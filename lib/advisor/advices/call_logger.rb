@@ -2,6 +2,28 @@ require 'logger'
 
 module Advisor
   module Advices
+    # A simple built-in logging advise
+    #
+    # == Examples
+    #
+    #   class MyClass
+    #     extend Advisor::Loggable
+    #
+    #     log_calls_to(:simple)
+    #     # [...]Called: MyClass#simple()
+    #
+    #     log_calls_to(:with_result, result: true)
+    #     # [...]Called: MyClass#with_result()
+    #     # [...]Result: MyClass#with_result() => String: "bla"
+    #
+    #     log_calls_to(:with_tag, tag: -> { "[id=#{id}]" }
+    #     # [...][id=42]Called: MyClass#with_tag()
+    #
+    #     log_calls_to(:with_specific_logger, logger: Rails.logger)
+    #     log_calls_to(
+    #       :with_backtrace_cleaner, backtrace_cleaner: CustomCleaner
+    #      )
+    #   end
     class CallLogger
       class << self
         attr_accessor :backtrace_cleaner

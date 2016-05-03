@@ -18,9 +18,12 @@ module Advisor
         @cleaner = opts[:backtrace_cleaner] || CallLogger.backtrace_cleaner
         @logger = opts[:logger] || CallLogger.default_logger
         @tag_proc = opts[:with] || -> {}
+        @log_result = opts[:result] || false
       end
 
-      attr_reader :object, :method, :call_args, :logger, :tag_proc, :cleaner
+      attr_reader(
+        :object, :method, :call_args, :logger, :tag_proc, :log_result, :cleaner
+      )
 
       def self.applier_method
         :log_calls_to
@@ -28,7 +31,7 @@ module Advisor
 
       def call
         logger.info(success_message)
-        yield
+        yield.tap(&result_message)
       rescue exception_class => e
         logger.error(failure_message(e))
         raise
@@ -44,6 +47,16 @@ module Advisor
         backtrace = ["\n", ex.to_s] + ex.backtrace
         backtrace = cleaner.clean(backtrace) if cleaner
         call_message('Failed: ', backtrace.join("\n"))
+      end
+
+      def result_message
+        lambda do |result|
+          return unless log_result
+
+          logger.info(
+            call_message('Result: ', " => #{result.class}: #{result.inspect}")
+          )
+        end
       end
 
       def call_message(prefix, suffix = '')

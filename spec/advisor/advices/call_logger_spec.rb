@@ -4,7 +4,9 @@ module Advisor
   module Advices
     describe CallLogger do
       subject(:advice) do
-        described_class.new(object, method, args, logger: logger, with: tag)
+        described_class.new(
+          object, method, args, logger: logger, with: tag, result: result
+        )
       end
 
       let(:object) { OpenStruct.new(id: 42, x: 'y') }
@@ -12,6 +14,7 @@ module Advisor
       let(:args) { ['the universe', 'and everything'] }
       let(:logger) { instance_double(Logger) }
       let(:tag) { -> { "[x=#{x}]" } }
+      let(:result) { true }
 
       let(:block) { -> { :bla } }
 
@@ -23,6 +26,12 @@ module Advisor
 Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
         end
 
+        let(:result_log_message) do
+          "[Time=#{Time.now}][Thread=#{Thread.current.object_id}][id=42][x=y]\
+Result: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\") \
+=> Symbol: :bla"
+        end
+
         before do
           allow(Time).to receive(:now).and_return(Time.now)
           allow(logger).to receive(:info)
@@ -32,6 +41,12 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
 
         it do
           expect(logger).to receive(:info).with(log_message)
+
+          call
+        end
+
+        it do
+          expect(logger).to receive(:info).with(result_log_message)
 
           call
         end
@@ -96,6 +111,16 @@ Called: OpenStruct#the_meaning_of_life(\"the universe\", \"and everything\")"
 
           it do
             expect(logger).to receive(:info).with(log_without_custom_tag)
+
+            call
+          end
+        end
+
+        context 'when it is not provided to log the result' do
+          let(:result) { false }
+
+          it do
+            expect(logger).not_to receive(:info).with(result_log_message)
 
             call
           end
